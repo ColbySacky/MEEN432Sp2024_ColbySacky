@@ -4,4 +4,4 @@ I believe the issues are in the regenerative breaking in the acceleration contro
 If that isn't the problem, it could also be that I may have connected my models wrong.
 Any advice would be greatly appreciated. Thank you in advance!
 
-NOTE: IF YOU SEE THIS COME BACK IN AN HOUR, SOMETHING HAPPENED TO MY CODE, IT was JUST WORKING!!!
+
