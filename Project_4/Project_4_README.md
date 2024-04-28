@@ -1,25 +1,42 @@
 # Updated Statement: Read Me
 I made the changes you suggested excluding organization. While I understand it looks better, combining everything and reconnecting everything is something I will save for the end once my code fully works. Right now to run my code, simply run "P4init" and then "P4_runsim". You will see that it completes 11 laps and does not violate the braking criteria. The main problem is the SOC conditions. While this could be from my regenerative braking or velocity controller module, I believe that it may have to do with how my battery currently works. Any advice on how to keep the SOC within 10-95% would be greatly appreciated. Thank you for your help! (P.S. Out of curiosity, what would my grade be if I can't fix this problem?)
 
-# Project 4 Review Request
+# **UPDATED** Project 4 Review Request
 
-The first thing I want to mention is that the EPA cycles are not needed for this project! Instead, you should be using the track that was created back in Project 2 and you want 
-to go around that track as fast as possible without going off the track for  60 minutes.
+## Battery Model
+1) I see why you are experiencing problems with the SOC, so remember that one of the requirements for this project is that the SOC
+must start at 80%. In order to do this, you need to think of the SOC equation:
+- SOC = 1 - (integral Icell/C)
+So if we want our vehicle to start at 80% we need to change the 1 to a 0.8
 
-## Model Tips
-1) I would suggest putting both of the driver models (p2 and p3) into a single subsystem and this will be the main driver model of your project.
-- The desired velocity of the driver model should be coming from a modified speed scheduler, where you take in the vehicle's current position on track and depending if the vehicle is on the straightaway or curved section, adjusts the desired velocity of the vehicle.
-- The actual velocity should just be the X component of the velocity (velocity from long model)
+2) Also, another thing I just want to mention is that the OCV ToWorkspace block should be connected to the output of the lookup table
+as this will save the OCV of the battery for each simulation time.
 
-2) The next thing I would suggest is to put the P2 and P3 models into respective subsystems for lateral and longitudinal dynamic frames. This will help organize your model into the main 4 components
-- Driver Model
-- Lateral Dynamics Body Frame
-- Longitudinal Dynamics Body Frame
-- Car Kinematic Frame (Transformation/Rotation in your model)
+## Driver Model
+1) The main issue with the SOC problem is that you are not recharging at all when your vehicle brakes meaning that the throttle and brake cmd logic might have issues
 
-3) Go back to the Acceleration Control block and review the logic used for the APP, BPP, and regen
-- Remember in P3, how we took a small percentage from the BPP cmd and added it to APP, and the rest was passed as friction brake cmd. You are doing a similar thing in this P4 logic, however you need to make sure the regen percentage matches that of what's discussed in the project requirements/constraints
+2) Looking at the logic that calculates APP and BPP I think I found the main issues. While you are calculating the regen percentage, you are not utilizing it in your logic. 
+- Looking at specifically the calculateAPPandBpp() fcn there is no need to check if the brakeCmd is > 0 because it never will be since you used a saturation block to limit
+brakeCmd between 0 and -1. 
+- Instead you should just have the following logic in that function: 
+-- APP = accelCmd + brakeCmd*regen
+-- BPP = brakeCmd * (1 - regen)
+- Doing so allows the regen portion of the brakes to be added to the throttle command and the rest is passed as friction brakes in the brake command.
 
-4) The next thing I would say it to go back and review the P3 and P2 feedback and make sure any changes suggested are implemented for this final model
+After making changes I still noticed that the vehicle was not producing any regen, so I decided to take a look at the APP and BPP signals and noticed that BPP was 0 for the entire simulation, meaning that the vehicle is not braking so it is never changing speed which made me take a look at the desirvd velocity
 
-You seem to be on the right track, but there are a few things missing from the driver logic. Address the changes I suggested and submit another request (or set up a zoom meeting with me) and I will go over your model once again.
+## Velocity Control Block
+I put a scope on the desired velocity and noticed that the desired velocity was not changing from the straightaway to the curved sections this is why the vehicle is never braking while it goes around the track and why you have no regen in the SOC chart
+I'm assuming that there are issues with the way you are deciding where the vehicle is on the track so make sure to go back to look at this logic
+
+
+FYI you can go faster on the straightaways than the curved sections so don't be afraid to play around with the speeds of the vehicle so that you can go around the track as fast as possible in an hour under the contraints given
+
+## Regarding your last question
+While I can't give you a definite answer on what your grade would be if you just submitted what you have now, I can say that you would get points take off for:
+1) Not meeting the SOC requirements
+2) The wrong logic used in the regen calculations
+
+So obviously it wouldn't be many points since your vehicle is still able to simulate properly and you are able to stay within the track but I hope you're able to finish this last project off strong!
+So hopefully with the help I provide you are able to make the changes and get your vehicle to go around the track as fast as it can!
+
