@@ -1,5 +1,5 @@
 # Updated Statement: Read Me
-I made the changes you suggested, to run my code, simply run "P4init" and then "P4_runsim". You will see that it completes 11 laps and does not violate the braking or SOC requirements. Thank you for all of your help!
+I made the changes you suggested, to run my code, simply run "FinalRace". What this code does is call my other two code files and provide the necessary results. You will see that it completes 11 laps and does not violate the braking or SOC requirements. Thank you for all of your help!
 
 
 # **UPDATED** Project 4 Review Request
